@@ -1,0 +1,22 @@
+{
+  "name": "conch-server",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doot0/conch-server.git"
+  },
+  "author": "doot0",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doot0/conch-server/issues"
+  },
+  "homepage": "https://github.com/doot0/conch-server#readme",
+  "dependencies": {
+    "socket.io": "^3.0.3"
+  }
+}
