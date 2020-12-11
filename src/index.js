@@ -18,6 +18,11 @@ io.on("connection", (socket) => {
     console.log('Disconnect', reason, uid)
   })
 
+  socket.on('message', (message) => {
+    console.log(message.body)
+    io.sockets.emit('message', message)
+  })
+
 });
 
 httpServer.listen(5001);
