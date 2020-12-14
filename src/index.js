@@ -19,7 +19,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on('message', (message) => {
-    console.log(message.body)
+    console.log(`IN | ${uid} |`, message)
     io.sockets.emit('message', message)
   })
 
