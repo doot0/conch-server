@@ -16,11 +16,17 @@ io.on("connection", (socket) => {
 
   socket.on('disconnect', (reason) => {
     console.log('Disconnect', reason, uid)
+    io.sockets.emit('leave', uid);
   })
 
   socket.on('message', (message) => {
     console.log(`IN | ${uid} |`, message)
     io.sockets.emit('message', message)
+  })
+  
+  socket.on('namechange', (name) => {
+    console.log(`NC ${uid} |`, name)
+    io.sockets.emit('namechange', name)
   })
 
 });
