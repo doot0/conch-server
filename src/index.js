@@ -11,8 +11,10 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
+
   const uid = socket.id;
   console.log("Connection", uid);
+  io.sockets.emit('join', uid);
 
   socket.on('disconnect', (reason) => {
     console.log('Disconnect', reason, uid)
@@ -23,7 +25,7 @@ io.on("connection", (socket) => {
     console.log(`IN | ${uid} |`, message)
     io.sockets.emit('message', message)
   })
-  
+
   socket.on('namechange', (name) => {
     console.log(`NC ${uid} |`, name)
     io.sockets.emit('namechange', name)
