@@ -26,6 +26,7 @@ const addUser = (userProfile, socketId) => {
 }
 
 const userOffline = (socketId) => {
+  console.error('user going offline', socketId);
   const userId = userList.findIndex((user) => user.socketId === socketId)
   if (userId !== -1) {
     userList[userId].online = false
@@ -36,27 +37,31 @@ io.on("connection", (socket) => {
 
   const uid = socket.id;
   console.log("Connection", uid);
-  io.sockets.emit('join', uid);
+  
+  socket.on('ident', (userProfile) => {
+    addUser(userProfile.body, userProfile.body.uid);
+    io.sockets.emit('join', { ...userProfile.body });
+    console.log(`ID | ${userProfile.body.uid}`)
+  })
 
   socket.on('disconnect', (reason) => {
     userOffline(uid);
-    console.log('Disconnect', reason, uid)
     io.sockets.emit('leave', uid);
+    console.log('Disconnect', reason, uid)
   })
 
-  socket.on('message', (message) => {
+  socket.on('message', (message) => {   
+    io.sockets.emit('message', message)    
     console.log(`IN | ${uid} |`, message)
-    io.sockets.emit('message', message)
   })
 
   socket.on('namechange', (userProfile) => {
     addUser(userProfile.body, uid);
-    console.log(`NC ${uid} |`, userProfile.body.name)
     io.sockets.emit('namechange', userProfile)
+    console.log(`NC ${uid} |`, userProfile.body.name)
   })
   
   socket.on('rolecall', () => {
-    console.log('RC', ...userList)
     socket.emit('userlist', userList)
   })
 
