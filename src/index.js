@@ -16,7 +16,9 @@ const addUser = (userProfile, socketId) => {
   const userId = userList.findIndex((user) => user.uid === userProfile.uid)
   if (userId !== -1) {
     userList[userId].name = userProfile.name
-  } else {    
+    userList[userId].online = true
+    userList[userId].socketId = socketId
+  } else {
     userList.push({
       ...userProfile,
       socketId,
@@ -26,8 +28,14 @@ const addUser = (userProfile, socketId) => {
 }
 
 const userOffline = (socketId) => {
-  console.error('user going offline', socketId);
-  const userId = userList.findIndex((user) => user.socketId === socketId)
+
+  const userSocketIds = [...userList].map((user) => user.socketId)
+  const userId = userSocketIds.findIndex((userSocket) => userSocket === socketId)
+
+  console.log('USERS', userSocketIds)
+  console.log('DISCONNECTING', socketId)
+  console.log('UID', userId)
+  
   if (userId !== -1) {
     userList[userId].online = false
   }
@@ -39,20 +47,29 @@ io.on("connection", (socket) => {
   console.log("Connection", uid);
   
   socket.on('ident', (userProfile) => {
-    addUser(userProfile.body, userProfile.body.uid);
+    addUser(userProfile.body, uid);
     io.sockets.emit('join', { ...userProfile.body });
     console.log(`ID | ${userProfile.body.uid}`)
   })
 
-  socket.on('disconnect', (reason) => {
-    userOffline(uid);
-    io.sockets.emit('leave', uid);
+  socket.on('disconnect', (reason) => {   
+    
+    let userId = [...userList].findIndex((user) => user.socketId === uid);
+    let leavingUser = userId === -1 ? uid : userList[userId]
+        
+    userOffline(leavingUser.socketId || uid);
+    
+    io.sockets.emit('leave', leavingUser);
+    
     console.log('Disconnect', reason, uid)
   })
 
   socket.on('message', (message) => {   
-    io.sockets.emit('message', message)    
-    console.log(`IN | ${uid} |`, message)
+    io.sockets.emit('message', {
+      message,
+      socketId: uid
+    })
+    console.log(`IN | ${uid} |`, {message, uid})
   })
 
   socket.on('namechange', (userProfile) => {
@@ -63,6 +80,7 @@ io.on("connection", (socket) => {
   
   socket.on('rolecall', () => {
     socket.emit('userlist', userList)
+    console.log('RC', userList)
   })
 
 });
